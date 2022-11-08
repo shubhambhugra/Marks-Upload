@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>MARKSHEET</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <style>
+        .container {
+            border: 2px solid black;
+            box-shadow: 0 0 15px black;
+            padding: 30px;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h2>Marksheet Form</h2>
+        <form id="StdForm" method="post">
+            <div class="form-group">
+                <span><label for="stdId">Student ID:</label> <label id="stdIdMsg"></label></span>
+                <input type="text" class="form-control" name="StdId" id="StdId" placeholder="Enter Student ID" required>
+            </div>
+            <div class="form-group">
+                <label for="stdName">Student Name:</label>
+                <input type="text" class="form-control" id="StdName" placeholder="Enter Student Name" name="StdName">
+            </div>
+            <div class="form-group">
+                <label for="physics">Physics:</label>
+                <input type="text" class="form-control" id="Physics" placeholder="Enter Physics marks" name="Physics">
+            </div>
+            <div class="form-group">
+                <label for="chemistry">Chemistry:</label>
+                <input type="text" class="form-control" id="Chemistry" placeholder="Enter Chemistry marks"
+                    name="Chemistry">
+            </div>
+            <div class="form-group">
+                <label for="maths">Maths:</label>
+                <input type="text" class="form-control" id="Maths" placeholder="Enter Maths marks" name="Maths">
+            </div>
+            <input type="button" class="btn-secondary" id="stdSave" value="Save" onclick="saveStudent();">
+        </form>
+    </div>
+    <script>
+        function validateAndGetFormData() {
+            var stdIdVar = $("#StdId").val();
+            if (stdIdVar === "") {
+                alert("Student ID Required Value");
+                $("#StdId").focus();
+                return "";
+            }
+            var stdNameVar = $("#StdName").val();
+            if (stdNameVar === "") {
+                alert("Student Name is Required Value");
+                $("#StdName").focus();
+                return "";
+            }
+            var PhysicsVar = $("#Physics").val();
+            if (PhysicsVar === "") {
+                alert("Physics marks is Required Value");
+                $("#Physics").focus();
+                return "";
+            }
+            var ChemistryVar = $("#Chemistry").val();
+            if (ChemistryVar === "") {
+                alert("Chemistry marks is Required Value");
+                $("#Chemistry").focus();
+                return "";
+            }
+            var MathsVar = $("#Maths").val();
+            if (MathsVar === "") {
+                alert("Maths marks is Required Value");
+                $("#Maths").focus();
+                return "";
+            }
+            var jsonStrObj = {
+                StdId: stdIdVar,
+                StdName: stdNameVar,
+                Physics: PhysicsVar,
+                Chemistry: ChemistryVar,
+                Maths: MathsVar,
+            };
+            return JSON.stringify(jsonStrObj);
+        }
+        function createPUTRequest(connToken, jsonObj, dbName, relName) {
+            var putRequest = "{\n"
+                + "\"token\" : \""
+                + connToken
+                + "\","
+                + "\"dbName\": \""
+                + dbName
+                + "\",\n" + "\"cmd\" : \"PUT\",\n"
+                + "\"rel\" : \""
+                + relName + "\","
+                + "\"jsonStr\": \n"
+                + jsonObj
+                + "\n"
+                + "}";
+            return putRequest;
+        }
+        function executeCommand(reqString, dbBaseUrl, apiEndPointUrl) {
+            var url = dbBaseUrl + apiEndPointUrl;
+            var jsonObj;
+            $.post(url, reqString, function (result) {
+                jsonObj = JSON.parse(result);
+            }).fail(function (result) {
+                var dataJsonObj = result.responseText;
+                jsonObj = JSON.parse(dataJsonObj);
+            });
+            return jsonObj;
+        }
+
+        function resetForm() {
+            $("#StdId").val("")
+            $("#StdName").val("");
+            $("#Physics").val("");
+            $("#Chemistry").val("");
+            $("#Maths").val("");
+            $("#StdId").focus();
+        }
+
+        function saveStudent() {
+            var jsonStr = validateAndGetFormData();
+            if (jsonStr === "") {
+                return;
+            }
+            var putReqStr = createPUTRequest("90937618|-31949269041865621|90952740",
+                jsonStr, "MARKSHEET", "MARKSHEET-REL");
+            alert(putReqStr);
+            jQuery.ajaxSetup({ async: false });
+            var resultObj = executeCommand(putReqStr,
+                "http://api.login2explore.com:5577", "/api/iml");
+            alert(JSON.stringify(resultObj));
+            jQuery.ajaxSetup({ async: true });
+            resetForm();
+        }
+    </script>
+</body>
+
+</html>
